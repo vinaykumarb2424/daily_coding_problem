@@ -19,6 +19,7 @@ class ReadGmails(object):
             mail = imaplib.IMAP4_SSL(ReadGmails.IMAP_SERVER)
             status, response = mail.login(self.username, self.password)
             if status == "OK":
+                print("login success")
                 return mail
             #print("status   : {}".format(status))
             #print("Response : {}".format(response[0].decode()))
