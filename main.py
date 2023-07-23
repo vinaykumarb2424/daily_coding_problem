@@ -135,9 +135,7 @@ class ReadGmails(object):
             raise Exception("Failed to logged out")
 
 
-mail = ReadGmails(quote_plus(os.environ.get("Gmail_username")), quote_plus(os.environ.get("Gmail_password")))
+mail = ReadGmails(os.environ.get("Gmail_username"), os.environ.get("Gmail_password"))
 mail.get_mail()
 mail.logout()
 
-# fkhxoadssqgwixau google app password
-#Lunareclipse@sun regula rpassword
