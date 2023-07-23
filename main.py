@@ -59,11 +59,12 @@ class ReadGmails(object):
             collection = db["problems"]
             query = {"problem_no":data["problem_no"]}
             collection.update_one(query, {"$set": data}, upsert=True)
-            #result = collection.insert_one(data)
             print(f"result added{data['problem_no']}")
             client.close()
+            return True
         except Exception as ex:
             print(ex)
+            return False
 
 
     def get_mail(self):
@@ -72,39 +73,58 @@ class ReadGmails(object):
             if self.mail:
                 self.mail.select(mailbox="Inbox")
                 try:
-                    count =1
-                    while count<803:
-                        status, mails = self.mail.search(
-                            None, f'FROM "Daily Coding Problem" Subject "Daily Coding Problem: Problem #{count}"')
-                        mail_list = mails[0].decode("utf-8").split()
-                        print(mail_list,len(mail_list))
-                        for mail_id in mail_list:
-                            status, mail_data = self.mail.fetch(mail_id, '(RFC822)')  # Fetch mail data
-                            if status == "OK":
-                                message = email.message_from_bytes(mail_data[0][1])  # Construct Message from mail data
-                                # print("From       : {0}".format(message.get("From")))
-                                # print("To         : {0}".format(message.get("To")))
-                                # print("Date       : {0}".format(message.get("Date")))
-                                subject =(message.get("Subject"))
-                                # print("Body       :")
-                                for part in message.walk():  # iterate over all the parts and subpart
-                                    # print(part)
-                                    if part.get_content_type() == "text/plain":
-                                        body = part.get_payload()
-                                        filtered_text =self.clean_body(body)
-                                        if filtered_text:
-                                            data = self.create_json_object(subject.strip(), filtered_text)
-                                            self.add_data(data)
-                                    elif part.get_content_type() == "text/html":
-                                        body = part.get_payload()
-                                        # print(body)
-                        count +=1
+                    count = int(self.read_count_file())
+                    #while count<803:
+                    status, mails = self.mail.search(
+                        None, f'FROM "Daily Coding Problem" Subject "Daily Coding Problem: Problem #{count}"')
+                    mail_list = mails[0].decode("utf-8").split()
+                    print(mail_list,len(mail_list))
+                    for mail_id in mail_list:
+                        status, mail_data = self.mail.fetch(mail_id, '(RFC822)')  # Fetch mail data
+                        if status == "OK":
+                            message = email.message_from_bytes(mail_data[0][1])  # Construct Message from mail data
+                            # print("From       : {0}".format(message.get("From")))
+                            # print("To         : {0}".format(message.get("To")))
+                            # print("Date       : {0}".format(message.get("Date")))
+                            subject =(message.get("Subject"))
+                            # print("Body       :")
+                            for part in message.walk():  # iterate over all the parts and subpart
+                                # print(part)
+                                if part.get_content_type() == "text/plain":
+                                    body = part.get_payload()
+                                    filtered_text =self.clean_body(body)
+                                    if filtered_text:
+                                        data = self.create_json_object(subject.strip(), filtered_text)
+                                        if self.add_data(data):
+                                            count += 1
+                                            if self.update_count_file(count):
+                                                print("succeed")
+
+                                elif part.get_content_type() == "text/html":
+                                    body = part.get_payload()
+                                    # print(body)
                 except Exception as ex:
-                        print(ex)
+                    print(ex)
             else:
                 print('login failed')
         except Exception as ex:
             raise Exception(f"failed to get email message:{ex}")
+
+    def read_count_file(self):
+        try:
+            with open(r'count.txt', 'r', encoding='utf-8') as file:
+                count = file.readlines()
+                return count[0]
+        except:
+            return False
+
+    def update_count_file(self, count):
+        try:
+            with open(r'count.txt', 'w', encoding='utf-8') as file:
+                file.writelines(str(count))  # replace existing data in write mode
+                return True
+        except :
+            return False
 
     def logout(self):
         try:
@@ -114,9 +134,9 @@ class ReadGmails(object):
             raise Exception("Failed to logged out")
 
 
-cv = ReadGmails("vinaykumarb2424@gmail.com", "fkhxoadssqgwixau")
-cv.get_mail()
-cv.logout()
+mail= ReadGmails("vinaykumarb2424@gmail.com", "fkhxoadssqgwixau")
+mail.get_mail()
+mail.logout()
 
 # fkhxoadssqgwixau google app password
 #Lunareclipse@sun regula rpassword
