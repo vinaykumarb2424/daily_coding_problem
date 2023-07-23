@@ -2,7 +2,8 @@ import re
 import email
 import imaplib
 from MONGO import *
-
+from urllib.parse import quote_plus
+from dotenv import load_dotenv
 
 class ReadGmails(object):
     IMAP_SERVER = "imap.gmail.com"
@@ -134,7 +135,7 @@ class ReadGmails(object):
             raise Exception("Failed to logged out")
 
 
-mail= ReadGmails("vinaykumarb2424@gmail.com", "fkhxoadssqgwixau")
+mail = ReadGmails(quote_plus(os.environ.get("Gmail_username")), quote_plus(os.environ.get("Gmail_password")))
 mail.get_mail()
 mail.logout()
 
