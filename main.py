@@ -81,30 +81,33 @@ class ReadGmails(object):
                         None, f'FROM "Daily Coding Problem" Subject "Daily Coding Problem: Problem #{count}"')
                     mail_list = mails[0].decode("utf-8").split()
                     print(mail_list,len(mail_list))
-                    for mail_id in mail_list:
-                        status, mail_data = self.mail.fetch(mail_id, '(RFC822)')  # Fetch mail data
-                        if status == "OK":
-                            message = email.message_from_bytes(mail_data[0][1])  # Construct Message from mail data
-                            # print("From       : {0}".format(message.get("From")))
-                            # print("To         : {0}".format(message.get("To")))
-                            # print("Date       : {0}".format(message.get("Date")))
-                            subject =(message.get("Subject"))
-                            # print("Body       :")
-                            for part in message.walk():  # iterate over all the parts and subpart
-                                # print(part)
-                                if part.get_content_type() == "text/plain":
-                                    body = part.get_payload()
-                                    filtered_text =self.clean_body(body)
-                                    if filtered_text:
-                                        data = self.create_json_object(subject.strip(), filtered_text)
-                                        if self.add_data(data):
-                                            count += 1
-                                            if self.update_count_file(count):
-                                                print("succeed")
+                    if mail_list:
+                        for mail_id in mail_list:
+                            status, mail_data = self.mail.fetch(mail_id, '(RFC822)')  # Fetch mail data
+                            if status == "OK":
+                                message = email.message_from_bytes(mail_data[0][1])  # Construct Message from mail data
+                                # print("From       : {0}".format(message.get("From")))
+                                # print("To         : {0}".format(message.get("To")))
+                                # print("Date       : {0}".format(message.get("Date")))
+                                subject =(message.get("Subject"))
+                                # print("Body       :")
+                                for part in message.walk():  # iterate over all the parts and subpart
+                                    # print(part)
+                                    if part.get_content_type() == "text/plain":
+                                        body = part.get_payload()
+                                        filtered_text =self.clean_body(body)
+                                        if filtered_text:
+                                            data = self.create_json_object(subject.strip(), filtered_text)
+                                            if self.add_data(data):
+                                                count += 1
+                                                if self.update_count_file(count):
+                                                    print("succeed")
 
-                                elif part.get_content_type() == "text/html":
-                                    body = part.get_payload()
-                                    # print(body)
+                                    elif part.get_content_type() == "text/html":
+                                        body = part.get_payload()
+                                        # print(body)
+                    self.logout()
+                    raise Exception(f"mail not found: {mail_list}")
                 except Exception as ex:
                     print(ex)
             else:
