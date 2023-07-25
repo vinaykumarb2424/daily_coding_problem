@@ -141,5 +141,5 @@ class ReadGmails(object):
 
 mail = ReadGmails(os.environ.get("Gmail_username"), os.environ.get("Gmail_password"))
 mail.get_mail()
-mail.logout()
+
 
