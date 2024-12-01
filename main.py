@@ -138,8 +138,15 @@ class ReadGmails(object):
         except:
             raise Exception("Failed to logged out")
 
+if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--username", required=True, help="Gmail username")
+    parser.add_argument("--password", required=True, help="Gmail password")
+    args = parser.parse_args()
 
-mail = ReadGmails(os.environ.get("Gmail_username"), os.environ.get("Gmail_password"))
-mail.get_mail()
+    # Pass the arguments to the ReadGmails constructor
+    mail = ReadGmails(username=args.username, password=args.password)
+    mail.get_mail()
 
 
