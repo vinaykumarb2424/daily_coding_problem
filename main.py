@@ -96,6 +96,7 @@ class ReadGmails(object):
                                     # print(part)
                                     if part.get_content_type() == "text/plain":
                                         body = part.get_payload(decode=True)
+                                        body = body.decode('utf-8', 'ignore')
                                         filtered_text =self.clean_body(body)
                                         if filtered_text:
                                             data = self.create_json_object(subject.strip(), filtered_text)
